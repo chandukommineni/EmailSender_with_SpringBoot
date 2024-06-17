@@ -1,7 +1,9 @@
 package emailsenderbackend.services;
 
 import emailsenderbackend.helper.Message;
+import jakarta.mail.Multipart;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.InputStream;
@@ -17,7 +19,7 @@ public interface EmailService {
     void sendEmailWithHtml(String to,String subject,String htmlContent);
     //send email with file
     void sendEmailWithFile(String to, String subject, String message, File file);
-    void sendEmailWithFile(String to, String subject, String message, InputStream is);
+    void sendEmailWithFile(String to, String subject, String message, MultipartFile file);
 
  List<Message> getInboxMessages();
 }

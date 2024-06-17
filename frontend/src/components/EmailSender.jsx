@@ -22,14 +22,20 @@ const EmailSender = () => {
         }
         try { 
             if (file) {
-                
                 const formData = new FormData();
-                formData.append("request", JSON.stringify(emailData)); // Convert emailData to JSON string
-                formData.append("file", file); // Append the file
-    
+                
+                formData.append('recipient', emailData.to); // Corrected to match backend
+                formData.append('subject', emailData.subject);
+                formData.append('message', emailData.message);
+                formData.append('file', file);
         
-                await sendEmailWithFile(formData); // Ensure your service handles this correctly
-                toast.success("Email Sent Successfully");
+                await sendEmailWithFile(formData);
+                        toast.success("Email Sent Successfully");
+                setLoading(false)
+                setEmailData({to:"",subject:"",message:""})
+                editorRef.current.setContent("")
+
+                
                 return
               }
             await sendEmail(emailData)
@@ -46,7 +52,7 @@ const EmailSender = () => {
     }
   return(
     <div className="w-full min-h-screen flex justify-center items-center">
-        <div className="email_card md:w-1/3 w-full my-4 p-4 border shadow rounded bg-white " >
+        <div className="email_card md:w-2/3 w-full my-4 p-4 border shadow rounded bg-white " >
             <h1 className="text-gray-900 text-3xl">Email Sender</h1>
             <p className="text-gray-700">Send Email to Others with your own Email Sender </p>
             <form onSubmit={handleSubmit}>

@@ -8,12 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.management.remote.JMXServerErrorException;
 import java.io.File;
@@ -93,26 +96,22 @@ public class EmailServiceImpl implements EmailService {
         }
     }
     @Override
-    public void sendEmailWithFile(String to, String subject, String message, InputStream is) {
-        MimeMessage mimeMessage=mailSender.createMimeMessage();
+    public void sendEmailWithFile(String to, String subject, String message, MultipartFile file) {
         try {
-            MimeMessageHelper helper=new MimeMessageHelper(mimeMessage,true);
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setFrom("abc@gmail.com");
-            helper.setText(message);
+            helper.setText(message, true);
 
-            File file=new File("src/main/resources/email/test.text");
-            Files.copy(is,file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            FileSystemResource fileSystemResource=new FileSystemResource(file);
-            helper.addAttachment(fileSystemResource.getFilename(),file);
+            if (!file.isEmpty()) {
+                InputStreamSource attachment = new ByteArrayResource(file.getBytes());
+                helper.addAttachment(file.getOriginalFilename(), attachment);
+            }
+
             mailSender.send(mimeMessage);
-            logger.info("email with file sended");
-
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (MessagingException | IOException e) {
+            throw  new RuntimeException(e);
         }
     }
 

@@ -6,6 +6,7 @@ import emailsenderbackend.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,8 @@ import java.io.IOException;
 public class EmailController {
     @Autowired
     private EmailService service;
+    @Autowired
+    private JavaMailSender mailSender;
 
     @PostMapping("/send")
     public ResponseEntity<?> sendEmail(@RequestBody EmailRequest request){
@@ -26,9 +29,12 @@ public class EmailController {
     }
 
     @PostMapping("/sendwithfile")
-    public ResponseEntity<CustomResponse> sendEmailWithFile(@RequestPart EmailRequest request, @RequestPart MultipartFile file ) throws IOException {
-        service.sendEmailWithFile(request.getTo(), request.getSubject(), request.getMessage(),file.getInputStream() );
-        return ResponseEntity.ok(CustomResponse.builder().message("Email Sent Successfully").status(HttpStatus.OK).success(true).build());
+    public ResponseEntity<CustomResponse> sendEmailWithFile(@RequestParam("recipient") String recipient,
+                                                            @RequestParam("subject") String subject,
+                                                            @RequestParam("message") String message,
+                                                            @RequestParam("file") MultipartFile file) throws IOException {
+     service.sendEmailWithFile(recipient, subject, message,file);
+     return ResponseEntity.ok(CustomResponse.builder().message("Email Sent Successfully").status(HttpStatus.OK).success(true).build());
 
     }
 
